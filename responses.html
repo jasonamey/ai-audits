@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Model Comparison — Digital Society</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: #edf0f4;
+      color: #1a1a2e;
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #0f0c29 0%, #1a1a4e 50%, #24243e 100%);
+      color: #fff;
+      padding: 56px 32px 48px;
+      text-align: center;
+    }
+    header h1 {
+      font-size: clamp(1.6rem, 4vw, 2.6rem);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+    }
+    header p {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 0.5px;
+    }
+    .model-pills {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,0.15);
+      backdrop-filter: blur(4px);
+    }
+    .pill svg { width: 16px; height: 16px; }
+    .pill-gpt  { background: rgba(16,163,127,0.2);  color: #5dffd9; }
+    .pill-gem  { background: rgba(66,133,244,0.2);  color: #93b7ff; }
+    .pill-cla  { background: rgba(217,119,87,0.2);  color: #ffb899; }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+    }
+
+    /* ── Category header ── */
+    .category { margin-bottom: 48px; }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .category-badge {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 5px 18px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .category-rule {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, #c0c8d8, transparent);
+    }
+
+    /* ── Question card ── */
+    .question-block {
+      background: #fff;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+      margin-bottom: 28px;
+    }
+    .question-header {
+      background: #f4f6fa;
+      border-bottom: 1px solid #e4e8f0;
+      padding: 22px 28px;
+    }
+    .q-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #8893aa;
+      text-transform: uppercase;
+      letter-spacing: 1.3px;
+      margin-bottom: 5px;
+    }
+    .q-text {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      line-height: 1.4;
+    }
+
+    /* ── Three-column responses ── */
+    .responses-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    .response-col {
+      border-right: 1px solid #e8ecf2;
+    }
+    .response-col:last-child { border-right: none; }
+
+    /* Model header strip */
+    .model-strip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 20px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    .model-strip svg { width: 26px; height: 26px; flex-shrink: 0; }
+    .model-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .col-gpt .model-strip  { background: #f0faf7; border-bottom-color: #d0ede8; }
+    .col-gpt .model-label  { color: #0a7c59; }
+    .col-gem .model-strip  { background: #f0f4ff; border-bottom-color: #cfd9ff; }
+    .col-gem .model-label  { color: #2e44b8; }
+    .col-cla .model-strip  { background: #fff5f0; border-bottom-color: #fcd9c8; }
+    .col-cla .model-label  { color: #b94518; }
+
+    /* Response body */
+    .response-body {
+      padding: 18px 20px;
+      font-size: 0.875rem;
+      color: #374151;
+      line-height: 1.72;
+    }
+    .response-body p { margin-bottom: 10px; }
+    .response-body p:last-child { margin-bottom: 0; }
+    .response-body strong { color: #111827; font-weight: 700; }
+    .response-body em { font-style: italic; color: #4b5563; }
+    .response-body ul {
+      margin: 6px 0 10px 18px;
+    }
+    .response-body li { margin-bottom: 4px; }
+    .response-body .section-label {
+      font-weight: 700;
+      color: #111;
+      margin-top: 12px;
+      display: block;
+    }
+
+    @media (max-width: 860px) {
+      .responses-grid { grid-template-columns: 1fr; }
+      .response-col { border-right: none; border-bottom: 1px solid #e8ecf2; }
+      .response-col:last-child { border-bottom: none; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>AI Model Comparison</h1>
+  <p>10 Questions on Digital Society &amp; Technology Ethics</p>
+  <div class="model-pills">
+    <span class="pill pill-gpt">
+      <!-- OpenAI logo -->
+      <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.77.77 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.896zm16.597 3.855l-5.843-3.372L15.117 7.2a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.405-.667zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"/>
+      </svg>
+      ChatGPT (GPT-4o)
+    </span>
+    <span class="pill pill-gem">
+      <!-- Gemini four-pointed star -->
+      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="hg1" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#93b7ff"/>
+            <stop offset="1" stop-color="#c4a0ff"/>
+          </linearGradient>
+        </defs>
+        <path d="M14 28C14 26.06 13.63 24.24 12.88 22.54C12.16 20.84 11.17 19.36 9.91 18.1C8.65 16.84 7.16 15.84 5.46 15.12C3.76 14.37 1.94 14 0 14C1.94 14 3.76 13.64 5.46 12.92C7.16 12.17 8.65 11.17 9.91 9.91C11.17 8.65 12.16 7.16 12.88 5.46C13.63 3.76 14 1.94 14 0C14 1.94 14.36 3.76 15.09 5.46C15.83 7.16 16.84 8.65 18.1 9.91C19.36 11.17 20.84 12.17 22.54 12.92C24.24 13.64 26.06 14 28 14C26.06 14 24.24 14.37 22.54 15.12C20.84 15.84 19.36 16.84 18.1 18.1C16.84 19.36 15.83 20.84 15.09 22.54C14.36 24.24 14 26.06 14 28Z" fill="url(#hg1)"/>
+      </svg>
+      Gemini (2.5-flash)
+    </span>
+    <span class="pill pill-cla">
+      <!-- Claude / Anthropic starburst -->
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <g transform="translate(20,20)">
+          <ellipse rx="4.5" ry="13" fill="#ffb899" transform="rotate(0) translate(0,-4)"/>
+          <ellipse rx="4.5" ry="13" fill="#ffb899" transform="rotate(60) translate(0,-4)"/>
+          <ellipse rx="4.5" ry="13" fill="#ffb899" transform="rotate(120) translate(0,-4)"/>
+          <ellipse rx="4.5" ry="13" fill="#ffb899" transform="rotate(180) translate(0,-4)"/>
+          <ellipse rx="4.5" ry="13" fill="#ffb899" transform="rotate(240) translate(0,-4)"/>
+          <ellipse rx="4.5" ry="13" fill="#ffb899" transform="rotate(300) translate(0,-4)"/>
+        </g>
+      </svg>
+      Claude (Sonnet 4.6)
+    </span>
+  </div>
+</header>
+
+<div class="container" id="app"></div>
+
+<script>
+// ── SVG logos (inline, reused per card) ──────────────────────────────────────
+
+const SVG_CHATGPT = `<svg viewBox="0 0 24 24" fill="#10A37F" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.77.77 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.896zm16.597 3.855l-5.843-3.372L15.117 7.2a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.405-.667zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"/>
+</svg>`;
+
+const SVG_GEMINI = `<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="gg1" x1="0" y1="0" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#4285F4"/>
+      <stop offset="1" stop-color="#7C3AED"/>
+    </linearGradient>
+  </defs>
+  <path d="M14 28C14 26.06 13.63 24.24 12.88 22.54C12.16 20.84 11.17 19.36 9.91 18.1C8.65 16.84 7.16 15.84 5.46 15.12C3.76 14.37 1.94 14 0 14C1.94 14 3.76 13.64 5.46 12.92C7.16 12.17 8.65 11.17 9.91 9.91C11.17 8.65 12.16 7.16 12.88 5.46C13.63 3.76 14 1.94 14 0C14 1.94 14.36 3.76 15.09 5.46C15.83 7.16 16.84 8.65 18.1 9.91C19.36 11.17 20.84 12.17 22.54 12.92C24.24 13.64 26.06 14 28 14C26.06 14 24.24 14.37 22.54 15.12C20.84 15.84 19.36 16.84 18.1 18.1C16.84 19.36 15.83 20.84 15.09 22.54C14.36 24.24 14 26.06 14 28Z" fill="url(#gg1)"/>
+</svg>`;
+
+const SVG_CLAUDE = `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(20,20)">
+    <ellipse rx="4.5" ry="13" fill="#D97757" transform="rotate(0) translate(0,-4)"/>
+    <ellipse rx="4.5" ry="13" fill="#D97757" transform="rotate(60) translate(0,-4)"/>
+    <ellipse rx="4.5" ry="13" fill="#D97757" transform="rotate(120) translate(0,-4)"/>
+    <ellipse rx="4.5" ry="13" fill="#D97757" transform="rotate(180) translate(0,-4)"/>
+    <ellipse rx="4.5" ry="13" fill="#D97757" transform="rotate(240) translate(0,-4)"/>
+    <ellipse rx="4.5" ry="13" fill="#D97757" transform="rotate(300) translate(0,-4)"/>
+  </g>
+</svg>`;
+
+// ── Markdown → HTML converter ─────────────────────────────────────────────────
+
+function md(text) {
+  const inline = s => s
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
+
+  const blocks = text.trim().split(/\n{2,}/);
+  return blocks.map(block => {
+    const lines = block.split('\n');
+    if (lines.every(l => l.trim().startsWith('- '))) {
+      const items = lines.map(l => `<li>${inline(l.trim().slice(2))}</li>`).join('');
+      return `<ul>${items}</ul>`;
+    }
+    // Mixed block: some lines may be list items
+    let html = '';
+    let inList = false;
+    for (const line of lines) {
+      if (line.trim().startsWith('- ')) {
+        if (!inList) { html += '<ul>'; inList = true; }
+        html += `<li>${inline(line.trim().slice(2))}</li>`;
+      } else {
+        if (inList) { html += '</ul>'; inList = false; }
+        if (line.trim()) html += `<p>${inline(line.trim())}</p>`;
+      }
+    }
+    if (inList) html += '</ul>';
+    return html;
+  }).join('');
+}
+
+// ── Data ──────────────────────────────────────────────────────────────────────
+
+const categories = [
+  {
+    name: "Access &amp; Equity",
+    questions: [
+      {
+        num: 1,
+        q: "Who gets to participate — and who is structurally excluded from the networked economy?",
+        chatgpt: `Participation in the networked economy is often influenced by factors such as access to digital infrastructure, financial resources, and digital literacy. Individuals in developed regions with robust internet connectivity and technological ecosystems are typically well-positioned to engage. However, those in rural areas, underdeveloped countries, or from marginalized communities may be structurally excluded due to inadequate access to technology, lack of education, and systemic socioeconomic barriers. Additionally, policies and systems that fail to address language and accessibility needs further marginalize certain groups, highlighting the need for inclusive strategies to bridge these digital divides.`,
+        gemini: `Participation in the networked economy predominantly favors individuals with reliable internet access, modern devices, and sufficient digital literacy, often correlating with urban residency and higher socioeconomic status. However, significant structural exclusion persists due to pervasive digital divides, stemming from poverty, geographical remoteness leading to "digital deserts," and lack of affordable infrastructure. Systemic inequalities, including discriminatory practices and limited access to quality education, further marginalize communities, preventing them from acquiring essential skills or capital. This creates a stark chasm, locking out billions from the opportunities and benefits promised by a globalized, networked economy.`,
+        claude: `Participation in the networked economy is largely shaped by intersecting barriers: **access to reliable infrastructure** (broadband, devices), **digital literacy**, **language**, and **capital** — both financial and social. Those without stable internet connections, formal education, or credit histories find themselves locked out of platforms that increasingly mediate employment, commerce, and civic life. Geographic divides matter enormously too — rural and Global South populations often face infrastructure gaps that aren't simply temporary but reflect deliberate investment decisions prioritizing profitable markets.
+
+Crucially, even nominal "inclusion" can mask **extractive participation**, where gig workers, data subjects, or content creators generate value they don't meaningfully own or govern. The structural question isn't just who logs on, but who sets the terms — and that power remains concentrated among a remarkably small set of platform owners, investors, and regulators from wealthy nations.`
+      },
+      {
+        num: 2,
+        q: "Is access to the internet a fundamental human right or a commodity subject to market forces?",
+        chatgpt: `Access to the internet is increasingly being viewed as a fundamental human right, particularly as digital connectivity becomes essential for exercising other rights, such as the right to education, freedom of expression, and access to information. The United Nations has highlighted internet access as integral to human development, enabling individuals to improve their quality of life and participate fully in society. However, the reality is that internet access is still often managed as a commodity, subject to market forces, pricing structures, and infrastructure limitations set by private corporations and states. The challenge lies in bridging the gap between idealistic aspirations and economic realities, ensuring equitable access while balancing the commercial interests of service providers. As more services and opportunities migrate online, the ethical imperative to provide universal access continues to grow.`,
+        gemini: `While the provision of internet access involves significant infrastructure investment and market competition, making it a commodity in its delivery, its nature has profoundly shifted. In the 21st century, internet connectivity is increasingly indispensable for exercising fundamental human rights like education, freedom of expression, access to information, economic opportunity, and civic participation. To deny access is often to deny full participation in modern society. Therefore, while market forces play a role, ensuring universal, affordable access often necessitates public policy and regulatory frameworks, treating it as a foundational utility essential for human dignity and societal inclusion, moving beyond a purely market-driven view.`,
+        claude: `This is genuinely contested territory where both frameworks capture something important. The internet has become so foundational to participation in economic life, civic discourse, healthcare access, and education that treating it purely as a commodity effectively creates a two-tiered citizenship where wealth determines meaningful social participation. The UN has recognized internet access as important to human rights expression, though notably stopping short of declaring connectivity itself a fundamental right.
+
+However, the commodity framework isn't simply wrong — infrastructure requires investment, maintenance, and ongoing development that market mechanisms can incentivize effectively. The more honest position is that **the internet functions infrastructurally like utilities**, where baseline access arguably warrants rights-like protections while quality and speed can remain market-differentiated.
+
+The critical tension is that framing access as a right without addressing what that actually guarantees — bandwidth minimums, device access, digital literacy — risks being symbolic rather than substantive. Countries like Finland and Estonia have moved toward legal guarantees, offering instructive real-world data on whether this produces better outcomes than pure market approaches.`
+      }
+    ]
+  },
+  {
+    name: "Power &amp; Governance",
+    questions: [
+      {
+        num: 3,
+        q: "Who controls the platforms, algorithms, and data pipelines that now shape public life?",
+        chatgpt: `The control over platforms, algorithms, and data pipelines is largely held by a small group of powerful technology companies often referred to as "Big Tech," such as Google, Facebook (now Meta), Amazon, and Apple. These companies are driven by their proprietary algorithms and data collection methods, which they use to influence user engagement and monetize through advertising and other services. While governments attempt regulatory oversight, the pace of technological advancement often outstrips legislative efforts, leaving significant power in the hands of these corporations. Furthermore, the centralized control by a few entities raises concerns about transparency, privacy, and the potential bottleneck of information and services that can lead to societal biases and inequities. To address these issues, there's growing advocacy for more decentralized control, enhanced regulation, privacy protection, and ethical accountability in tech development and deployment.`,
+        gemini: `Control over platforms, algorithms, and data pipelines is primarily consolidated within a few powerful tech corporations that design, own, and operate these pervasive systems. Yet, this power is not absolute, as governments worldwide increasingly assert regulatory authority through antitrust measures and data privacy laws to shape their operations. Engineers and product designers also exert significant influence through their fundamental architectural and ethical choices, embedded in the very code. Furthermore, users, civil society, and investors collectively exert indirect pressures, influencing platform policies and public discourse. Thus, control is a highly distributed and dynamic interplay, continuously negotiated among powerful corporate entities, regulatory bodies, and various societal stakeholders.`,
+        claude: `A concentrated set of actors holds this power: a handful of large technology corporations (primarily Meta, Google, Amazon, Microsoft, and Apple) control the dominant platforms and infrastructure, while a smaller circle of executives, engineers, and major shareholders make consequential design decisions with limited democratic accountability. Governments exercise partial influence through regulation, but enforcement is uneven — the EU has pushed hardest through instruments like the GDPR and Digital Markets Act, while US oversight remains fragmented.
+
+Increasingly, institutional investors and advertisers also shape platform behavior indirectly, since revenue models determine what content gets amplified. What makes this genuinely complex is that control isn't monolithic — it's distributed across technical systems, business incentives, regulatory frameworks, and user behavior in ways that make clean accountability difficult to assign or reform.`
+      },
+      {
+        num: 4,
+        q: "How should democratic societies regulate AI and algorithmic decision-making without stifling innovation?",
+        chatgpt: `Democratic societies should aim for a balanced regulatory approach to AI and algorithmic decision-making by establishing clear ethical guidelines that prioritize transparency, accountability, and fairness. Regulations should require companies to implement explainability in AI systems to ensure users and affected individuals understand how decisions are made, without necessarily demanding the disclosure of proprietary algorithms. It's important to set standards for data quality and bias mitigation to protect against discrimination while encouraging research and collaboration between government, academia, and industry to foster innovation. Additionally, implementing a risk-based framework where regulations are proportionate to the potential societal impact of the AI systems can prevent unnecessary bureaucratic burdens on less impactful innovations.`,
+        gemini: `Democratic societies should adopt a risk-based, proportional approach, focusing regulation on high-impact AI systems rather than broad technological bans. This involves mandating transparency, accountability, and human oversight for critical algorithmic decisions, alongside robust impact assessments and explainability requirements. To avoid stifling innovation, regulation should be principles-based, allowing for diverse technological solutions and creating "innovation sandboxes" for ethical development. Fostering public-private collaboration, offering incentives for trustworthy AI, and investing in research will cultivate responsible innovation. The goal is to safeguard fundamental rights and democratic values while enabling beneficial technological progress.`,
+        claude: `This is genuinely difficult terrain requiring honest tradeoffs rather than comfortable platitudes. **The core tension is real**: meaningful oversight requires understanding systems that move faster than regulatory capacity, while light-touch approaches historically allow harm to accumulate before correction arrives.
+
+**What evidence suggests works reasonably well:**
+- Risk-tiered regulation (higher scrutiny for consequential decisions like credit, hiring, criminal justice) rather than blanket rules
+- Mandatory impact assessments and algorithmic auditing requirements, with independent third-party verification
+- Transparency obligations calibrated to context — not exposing trade secrets, but enabling meaningful accountability
+
+**Where I'd push back on common assumptions:**
+- "Innovation stifling" concerns are often industry-lobbying framings; regulation frequently *drives* innovation toward safer designs
+- Democratic legitimacy matters independently of efficiency — societies have genuine interests in how power is exercised over them
+- Purely technical solutions like explainability requirements can create *theater* of accountability without substance
+
+**Honest uncertainties:**
+- We lack good evidence on which regulatory approaches actually improve outcomes versus creating compliance burdens
+- International coordination problems are genuinely unsolved
+- Democratic processes themselves can be captured by interests they're meant to regulate`
+      },
+      {
+        num: 5,
+        q: "In a borderless information environment, what authority do nation-states still hold — and over what?",
+        chatgpt: `In a borderless information environment, nation-states retain significant authority over their own cyberspace policies, infrastructure, and regulation of content and data flows within their jurisdictions. They exercise power through laws and frameworks that address cybersecurity, privacy, information flow, and digital rights. Additionally, states can enforce compliance within their territories by leveraging economic power over digital platforms and services and, in some cases, through diplomatic channels to negotiate international agreements or standards. Yet, their authority is limited by the transnational nature of digital platforms and services, which often operate across multiple legal and regulatory environments. Balancing domestic control with international cooperation remains a critical challenge for nation-states.`,
+        gemini: `In a borderless information environment, nation-states face diminished direct control over the *flow* of information itself, challenged by global platforms, encryption, and decentralized networks. However, they retain significant authority over *physical internet infrastructure* within their borders, such as ISPs and data centers, enabling legal mandates, content blocking, and data requests. Their power also lies in establishing *legal and regulatory frameworks* for data privacy, cybersecurity, and content moderation for entities operating within their jurisdiction or impacting their citizens. Furthermore, they leverage *economic pressure* and *diplomatic influence* to shape global digital norms and compel tech companies to comply with national laws, asserting digital sovereignty despite the internet's transnational nature.`,
+        claude: `Nation-states retain meaningful authority over **infrastructure, people, and consequences** even when they cannot fully control information flows themselves. They regulate the physical and corporate layer — data centers, telecommunications licensing, payment systems, and the legal registration of platforms — giving them leverage over companies even when content crosses borders. They also retain jurisdiction over their citizens' behavior and can impose liability domestically, making the *effects* of information actionable even if the source is foreign.
+
+What they've genuinely lost is **monopoly over the narrative environment** — they can no longer be the sole authoritative voice reaching their populations. The interesting tension is that this loss has pushed some states toward increasingly aggressive infrastructure control (internet kill switches, sovereign intranets) precisely *because* softer informational authority has eroded.`
+      }
+    ]
+  },
+  {
+    name: "Privacy &amp; Surveillance",
+    questions: [
+      {
+        num: 6,
+        q: "Does the collection, sale, and weaponization of personal data represent a new form of exploitation?",
+        chatgpt: `Yes, the collection, sale, and weaponization of personal data can be seen as a new form of exploitation, often dubbed "surveillance capitalism." In this framework, individuals' data is collected, sometimes without their explicit consent or understanding, and then monetized by companies seeking to influence behavior or predict future actions. This commodification of personal data shifts power dynamics, often disproportionately favoring companies over individuals, as users lose control over their personal information and privacy. Additionally, when data is weaponized for political or manipulative purposes, it can exacerbate issues of misinformation and polarize society, sparking ethical concerns about autonomy and consent. Therefore, while data itself is a neutral asset, the practices surrounding its use can raise significant ethical issues akin to modern exploitation.`,
+        gemini: `Yes, the extensive collection, commodification, and weaponization of personal data undeniably represent a new and insidious form of exploitation. Individuals, often unknowingly or without genuine consent, surrender invaluable insights into their lives, which are then extracted, refined, and monetized by powerful entities, creating a significant power imbalance. This process extracts value from an individual's digital existence, turning their behaviors and preferences into assets for others' gain. When this data is weaponized for targeted manipulation, discrimination, or social control, it profoundly undermines human agency, erodes privacy, and can inflict societal harm, marking a distinct ethical challenge in the digital age.`,
+        claude: `Yes, in meaningful ways it does represent a new form of exploitation, though with important nuances worth examining carefully.
+
+**Where the exploitation argument is strong:**
+- People provide data under conditions of genuine information asymmetry — they rarely understand what's collected or how it's monetized
+- The value extracted from aggregate behavioral data vastly exceeds any "free service" compensation users receive
+- Targeted manipulation — whether for commercial or political purposes — can compromise autonomous decision-making in ways traditional advertising couldn't
+
+**Where the argument needs qualifying:**
+- "Exploitation" historically implies a clearer victim-perpetrator relationship; data economics are more diffuse and people do receive real value from services
+- Some data collection enables genuinely beneficial outcomes like medical research or infrastructure planning
+
+**The most honest assessment:** The novel element isn't exploitation itself but its *scale and invisibility* — traditional exploitation was typically visible enough to organize against. Data extraction operates through deliberate opacity, making consent largely fictional rather than genuinely informed. The strongest concern is that the architecture creates **structural power imbalances** that are difficult to identify, resist, or regulate effectively.`
+      },
+      {
+        num: 7,
+        q: "Can privacy meaningfully survive in an era of pervasive sensors, biometrics, and predictive profiling?",
+        chatgpt: `The preservation of privacy in an era dominated by pervasive sensors, biometrics, and predictive profiling demands a robust framework of ethical guidelines, legal protections, and technological innovations. While the sheer volume and granularity of data collected pose significant challenges to traditional notions of privacy, effective encryption, anonymization techniques, and stringent data governance can mitigate potential intrusions. Furthermore, cultivating a culture that prioritizes privacy — through public awareness and education — can push for more transparent and responsible data policies. Ultimately, privacy can survive if individuals, companies, and governments collaboratively redefine its parameters and rigorously safeguard it in the digital landscape.`,
+        gemini: `Privacy, in its traditional sense of controlling personal data through secrecy, is indeed profoundly challenged by pervasive sensors, biometrics, and predictive profiling. These technologies enable unprecedented data capture and inference, often without explicit consent, eroding established boundaries of individual control. However, privacy is not necessarily extinct but rather transforming into a more dynamic concept of contextual integrity and managed transparency. Its survival hinges on the development of robust regulatory frameworks, privacy-enhancing technologies, and evolving societal norms that empower individuals to negotiate the terms of their data's collection and use, rather than simply prevent it. We must redefine privacy as an ongoing negotiation and a fundamental right in our increasingly transparent digital lives.`,
+        claude: `Privacy's survival depends on reframing it as something **actively constructed rather than passively assumed**. The naive model — privacy as simply "others not seeing you" — is functionally dead in environments saturated with sensors and inference engines. However, meaningful privacy can persist through legal frameworks that regulate *use and consequence* rather than merely collection, strong encryption, and cultivated norms around contextual integrity — the principle that information shared in one context shouldn't automatically flow to others.
+
+The honest challenge is structural: the entities with greatest capacity to surveil also have greatest economic and political incentive to resist limits. Predictive profiling is particularly corrosive because it punishes people for statistically probable futures rather than actual choices, effectively criminalizing identity rather than behavior.
+
+My genuine assessment is that privacy will survive **unevenly** — as a meaningful right for those with resources, technical literacy, and political power to demand it, while becoming increasingly hollow for vulnerable populations who lack bargaining leverage. This makes privacy fundamentally a **justice issue**, not merely a technical one.`
+      }
+    ]
+  },
+  {
+    name: "Knowledge &amp; Truth",
+    questions: [
+      {
+        num: 8,
+        q: "Does the abundance of information produce a better-informed public, or does it breed fragmentation and post-truth?",
+        chatgpt: `The abundance of information has the potential to create a better-informed public by providing diverse perspectives and comprehensive coverage of issues. However, it also risks leading to fragmentation and a post-truth society due to the sheer volume of content, which can overwhelm individuals and make discerning credible sources challenging. The ease of spreading misinformation or selectively consuming information that reinforces existing beliefs can exacerbate polarization. Thus, the outcome depends significantly on media literacy, critical thinking skills, and institutional efforts to promote accurate information over misleading content.`,
+        gemini: `The abundance of information presents a paradox: while it offers unprecedented access to diverse perspectives and data, it doesn't automatically equate to a better-informed public. Instead, the sheer volume can overwhelm, leading to cognitive overload and a retreat into easily digestible, often biased, information sources. This frequently fosters fragmentation, as individuals gravitate towards echo chambers that reinforce existing beliefs rather than encouraging critical engagement with differing viewpoints. Consequently, discerning credible information from misinformation becomes a significant challenge, contributing to a "post-truth" environment where shared factual understanding erodes.`,
+        claude: `Both dynamics operate simultaneously, which is what makes this question so difficult to resolve cleanly. The abundance of information has genuinely democratized knowledge access, enabling citizens to fact-check claims, access primary sources, and organize around issues that legacy media ignored. However, the same infrastructure creates powerful incentives for algorithmic personalization that sorts people into epistemically isolated communities, where emotionally resonant misinformation often outcompetes accurate but complex reporting.
+
+The critical variable isn't the volume of information itself but the *architecture* through which it's distributed — attention-economy platforms optimize for engagement rather than accuracy or productive disagreement. So the honest answer is that abundance produces both outcomes, with fragmentation currently winning in many contexts not because people are irrational, but because the systems surrounding information are designed to exploit cognitive shortcuts rather than support deliberate reasoning.`
+      },
+      {
+        num: 9,
+        q: "Who owns knowledge — and should intellectual property rights still apply in a culture of open sharing?",
+        chatgpt: `Knowledge ownership is a complex interplay between individuals, communities, and societal structures. Intellectual property rights aim to incentivize innovation by ensuring creators gain recognition and economic benefits from their work. However, the rise of open sharing, spurred by digital technologies, challenges traditional notions by emphasizing collaboration and accessibility. While intellectual property rights are crucial for protecting creators' interests and sustaining economic models, they may need re-evaluation to strike a balance with open-access principles, thereby ensuring both innovation and equitable access to knowledge. Adjusting to a digital culture might involve more flexible licensing models and greater focus on public domain contributions.`,
+        gemini: `Fundamentally, knowledge is a collective human heritage, often built through shared discovery and cultural exchange. Yet, intellectual property (IP) rights legally establish temporary ownership, intended to incentivize creation and investment in research and development. The pervasive culture of digital open sharing, however, profoundly challenges these traditional frameworks by enabling widespread access and remixing. While strict proprietary application can hinder equitable access and collaborative innovation, completely dismantling IP might disincentivize creators and certain industries, particularly in complex R&D. The ethical path forward lies in evolving IP models, like open licenses and tiered access, to balance creator incentives with broad societal benefit and the communal nature of knowledge.`,
+        claude: `This is genuinely contested territory. Knowledge has always built on prior knowledge, making absolute ownership philosophically problematic — Newton's "standing on the shoulders of giants" captures how intellectual progress is inherently cumulative and social. Yet intellectual property frameworks exist partly to incentivize creation by ensuring creators can recover investment, which matters especially in resource-intensive fields like pharmaceuticals or filmmaking.
+
+The real tension is that IP rights as currently structured often serve corporate consolidation more than individual creators — copyright terms extending decades beyond a creator's death primarily benefit rights-holding institutions, not creative incentives. Open-source software, Creative Commons licensing, and open-access publishing demonstrate that robust creative ecosystems can thrive with modified or minimal IP restrictions.
+
+A nuanced position recognizes that **context matters enormously** — a musician deserves protection from having their work monetized without consent, while paywalling life-saving medical research behind patents creates genuine ethical harm. The most defensible framework probably involves significantly shortened, more targeted protections combined with strong attribution norms, rather than choosing absolutely between ownership and openness.`
+      }
+    ]
+  },
+  {
+    name: "Labor &amp; the Future",
+    questions: [
+      {
+        num: 10,
+        q: "What happens to human identity, meaning, and labor when machines can match or exceed cognitive work?",
+        chatgpt: `As machines begin to match or exceed cognitive work, human identity may shift, emphasizing creativity, emotional intelligence, and social interaction — areas where machines traditionally underperform. The meaning of work could evolve, with greater focus on roles that harness uniquely human traits and foster personal growth or societal contribution, rather than just efficiency. Labor markets might undergo significant transformation, leading to the potential obsolescence of certain jobs, but also the emergence of new roles that complement machine capabilities. This transition could necessitate a reevaluation of educational systems and lifelong learning practices to equip individuals with skills suited to a technologically sophisticated world. Ethical considerations surrounding equitable access to opportunities and the fair distribution of AI-generated wealth will be critical to address societal inequities that may arise during this transformation.`,
+        gemini: `When machines surpass human cognitive capabilities, human identity and meaning, historically intertwined with productive labor, face a profound reorientation. The locus of self-worth may shift from vocational performance to unique human attributes like creativity, empathy, ethical reasoning, and the pursuit of intrinsically meaningful activities and relationships. While much traditional cognitive labor will be transformed or automated, new demands will emerge for human-centric roles involving design, ethical oversight, emotional intelligence, and complex, adaptive problem-solving alongside AI. This necessitates a societal recalibration of value systems, potentially decoupling dignity from traditional employment and exploring new economic models like universal basic income to support human flourishing beyond market participation. The core challenge lies in fostering a future where human purpose and well-being thrive in collaboration with, rather than in competition against, advanced intelligence.`,
+        claude: `This is genuinely one of the most consequential questions of our moment, and honest analysis requires holding several tensions simultaneously.
+
+**The optimistic framing has real substance:** Historically, automation has repeatedly displaced specific tasks while expanding the scope of meaningful human activity. Identity and meaning have never been *solely* derived from cognitive labor — they emerge from relationships, creativity, moral struggle, and the experience of being a particular person in a particular life.
+
+**But the current transition has distinctive features worth taking seriously:**
+- Previous automation displaced *physical* or *routine* cognitive work. Current AI challenges the activities — writing, analysis, judgment — that educated people built their *self-conception* around
+- The speed of transition may matter as much as its direction; social meaning-making structures adapt slowly
+- Labor isn't just income — it's social participation, structure, and the experience of being needed
+
+**The harder honest point:** We don't actually know whether "meaning" scales to a post-scarcity cognitive environment. Some people flourish without instrumental pressure; evidence suggests many struggle with purposelessness when external demands disappear.
+
+**What I'd push back against:** Both utopian framings ("humans will finally pursue higher things") and dystopian ones ("we'll become purposeless") assume human nature is more fixed than it is. Identity is remarkably adaptive — but adaptation requires institutions, not just technology. The real risk isn't machines replacing humans, but a transition managed so poorly that the benefits accrue to a few while the costs are borne by everyone else.`
+      }
+    ]
+  }
+];
+
+// ── Render ────────────────────────────────────────────────────────────────────
+
+function renderModel(model, text, svgLogo, colClass, labelText) {
+  return `
+    <div class="response-col ${colClass}">
+      <div class="model-strip">
+        ${svgLogo}
+        <span class="model-label">${labelText}</span>
+      </div>
+      <div class="response-body">${md(text)}</div>
+    </div>`;
+}
+
+function renderQuestion(q) {
+  return `
+    <div class="question-block">
+      <div class="question-header">
+        <div class="q-label">Question ${q.num}</div>
+        <div class="q-text">${q.q}</div>
+      </div>
+      <div class="responses-grid">
+        ${renderModel('chatgpt', q.chatgpt, SVG_CHATGPT, 'col-gpt', 'ChatGPT (GPT-4o)')}
+        ${renderModel('gemini', q.gemini, SVG_GEMINI, 'col-gem', 'Gemini (2.5-flash)')}
+        ${renderModel('claude', q.claude, SVG_CLAUDE, 'col-cla', 'Claude (Sonnet 4.6)')}
+      </div>
+    </div>`;
+}
+
+function renderCategory(cat) {
+  return `
+    <div class="category">
+      <div class="category-header">
+        <span class="category-badge">${cat.name}</span>
+        <div class="category-rule"></div>
+      </div>
+      ${cat.questions.map(renderQuestion).join('')}
+    </div>`;
+}
+
+document.getElementById('app').innerHTML = categories.map(renderCategory).join('');
+</script>
+
+</body>
+</html>
